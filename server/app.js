@@ -6,7 +6,7 @@ const app = express();
 
 app.get('/', function(req, res){
 
-    res.status(200).send('Hello GCP Auto trigger');
+    res.status(200).send('Git env var test');
 
 });
 
