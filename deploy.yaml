@@ -9,6 +9,7 @@ spec:
     protocol: TCP
   selector:
     app: gcp-test-app
+  type: LoadBalaner  
 
 ---
 
