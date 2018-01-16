@@ -6,7 +6,7 @@ steps:
     - |
 
       sed "s/_VER_/$BRANCH_NAME/" server/app.js
-      cat server/app.js      
+      sed -i "s/IMAGE_TAG/$BRANCH_NAME-$REVISION_ID/" deploy.yaml     
 
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -16,5 +16,13 @@ steps:
     args: ['push', 'gcr.io/${PROJECT_ID}/gcptest-image:$BRANCH_NAME-$REVISION_ID']
 
 
-
+  # Update Deployment with new image  
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      export CLOUDSDK_COMPUTE_ZONE=asia-south1-a
+      export CLOUDSDK_CONTAINER_CLUSTER=testcluster
+      /builder/kubectl.bash apply -f deploy.yaml --namespace=$BRANCH_NAME
 
