@@ -1,4 +1,14 @@
 steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+
+      sed "s/_VER_/$BRANCH_NAME/" server/app.js
+      cat server/app.js      
+
+
   - name: 'gcr.io/cloud-builders/docker'
     args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/gcptest-image:$BRANCH_NAME-$REVISION_ID', '.' ]
     

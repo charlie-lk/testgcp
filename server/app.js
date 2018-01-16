@@ -6,7 +6,7 @@ const app = express();
 
 app.get('/', function(req, res){
 
-    res.status(200).send('Git env var test');
+    res.status(200).send('Phase: GCP Test - Version: _VER_');
 
 });
 
