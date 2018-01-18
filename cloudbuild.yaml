@@ -8,7 +8,13 @@ steps:
       sed -i "s/_VER_/$BRANCH_NAME/" server/app.js
       sed -i "s/PROJECT_ID/$PROJECT_ID/" deploy.yaml
       sed -i "s/IMAGE_TAG/$BRANCH_NAME-$REVISION_ID/" deploy.yaml 
-      cat server/app.js    
+      
+      if [ $PROJECT_ID = "charlie-test-project-master" ]
+      then        
+        echo "charlie-test-master" > CLUSTER.txt
+      else       
+        echo "testcluster" > CLUSTER.txt
+      fi
 
 
   - name: 'gcr.io/cloud-builders/docker'
@@ -25,6 +31,6 @@ steps:
     - '-c'
     - |
       export CLOUDSDK_COMPUTE_ZONE=asia-south1-a
-      export CLOUDSDK_CONTAINER_CLUSTER=testcluster
+      export CLOUDSDK_CONTAINER_CLUSTER=`cat CLUSTER.txt`
       /builder/kubectl.bash apply -f deploy.yaml --namespace=$BRANCH_NAME
 
