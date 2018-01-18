@@ -1,17 +1,36 @@
 steps:
-  - name: 'gcr.io/cloud-builders/docker'
-    args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/gcptest-image', '.' ]
-    
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/${PROJECT_ID}/gcptest-image']
-
   - name: 'gcr.io/cloud-builders/gcloud'
-    args: ['container', 'clusters', 'get-credentials', 'testcluster', '--zone=asia-south1-a']
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
 
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args: [ 'run', 'gcp-test-app', '--image=gcr.io/${PROJECT_ID}/gcptest-image', '--port=8080' ]
+      sed -i "s/_VER_/$BRANCH_NAME/" server/app.js
+      sed -i "s/PROJECT_ID/$PROJECT_ID/" deploy.yaml
+      sed -i "s/IMAGE_TAG/$BRANCH_NAME-$REVISION_ID/" deploy.yaml 
+      
+      if [ $PROJECT_ID = "charlie-test-project-master" ]
+      then        
+        echo "charlie-test-master" > CLUSTER.txt
+      else       
+        echo "testcluster" > CLUSTER.txt
+      fi
+
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: [ 'build', '-t', 'gcr.io/${PROJECT_ID}/gcptest-image:$BRANCH_NAME-$REVISION_ID', '.' ]
     
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args: ['expose', 'deployment', 'gcp-test-app', '--type=LoadBalancer', '--port=80', '--target-port=8080']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/${PROJECT_ID}/gcptest-image:$BRANCH_NAME-$REVISION_ID']
 
+
+  # Update Deployment with new image  
+  - name: 'gcr.io/cloud-builders/kubectl'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      export CLOUDSDK_COMPUTE_ZONE=asia-south1-a
+      export CLOUDSDK_CONTAINER_CLUSTER=`cat CLUSTER.txt`
+      /builder/kubectl.bash apply -f deploy.yaml --namespace=$BRANCH_NAME
 
