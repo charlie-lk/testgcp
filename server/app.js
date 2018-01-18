@@ -14,4 +14,4 @@ app.get('/', function(req, res){
 app.listen(8080);
 
 
-//Namespace update
+//Kubernate permission for GCP service account
